@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,7 @@ public class Main {
 
     public static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException {
 
         System.out.println("--------------------------------------------");
         System.out.println("Welcome to Pokemon Finder!!");
@@ -44,7 +43,8 @@ public class Main {
             Pokemon cachedPokemon = null;
 
             // Retrieve Cache data
-            List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(Paths.get("cache.txt").toFile(), Pokemon[].class));
+            InputStream in = Main.class.getResourceAsStream("/cache.txt");
+            List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(in, Pokemon[].class));
             List<Pokemon> copiedCachedData = new ArrayList<>(cachedData);
 
             // If find the Pokemon & not older than a week old, use cache.

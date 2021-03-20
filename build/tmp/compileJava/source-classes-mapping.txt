@@ -18,13 +18,13 @@ dto/PokemonResponse.java
  dto.PokemonResponse
 dto/Stats.java
  dto.Stats
-dto/Stat.java
- dto.Stat
+Main.java
+ Main
 entity/Stat.java
  entity.Stat
 dto/VersionDetails.java
  dto.VersionDetails
 entity/Method.java
  entity.Method
-Main.java
- Main
+dto/Stat.java
+ dto.Stat
