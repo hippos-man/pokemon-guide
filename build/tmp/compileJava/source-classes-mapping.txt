@@ -1,30 +1,30 @@
-Entity/Method.java
- Entity.Method
-DTO/VersionDetails.java
- DTO.VersionDetails
-DTO/Stats.java
- DTO.Stats
-DTO/LocationArea.java
- DTO.LocationArea
-DTO/Stat.java
- DTO.Stat
-DTO/PokemonResponse.java
- DTO.PokemonResponse
-DTO/Type.java
- DTO.Type
-Entity/Pokemon.java
- Entity.Pokemon
-DTO/Method.java
- DTO.Method
-DTO/Types.java
- DTO.Types
-DTO/EncounterDetails.java
- DTO.EncounterDetails
-Entity/Stat.java
- Entity.Stat
-DTO/Encounter.java
- DTO.Encounter
-Entity/EncounterCondition.java
- Entity.EncounterCondition
+dto/Types.java
+ dto.Types
+dto/EncounterDetails.java
+ dto.EncounterDetails
+dto/LocationArea.java
+ dto.LocationArea
+dto/Type.java
+ dto.Type
+entity/EncounterCondition.java
+ entity.EncounterCondition
+dto/Encounter.java
+ dto.Encounter
+dto/Method.java
+ dto.Method
+entity/Pokemon.java
+ entity.Pokemon
+dto/PokemonResponse.java
+ dto.PokemonResponse
+dto/Stats.java
+ dto.Stats
+dto/Stat.java
+ dto.Stat
+entity/Stat.java
+ entity.Stat
+dto/VersionDetails.java
+ dto.VersionDetails
+entity/Method.java
+ entity.Method
 Main.java
  Main

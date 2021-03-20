@@ -1,7 +1,7 @@
-import Entity.EncounterCondition;
-import Entity.Pokemon;
-import Entity.Stat;
-import DTO.*;
+import entity.EncounterCondition;
+import entity.Pokemon;
+import entity.Stat;
+import dto.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -125,47 +125,19 @@ public class Main {
                     }
                     encounterConditionList.add(new EncounterCondition(locationName, methods));
                 }
-                // TODO Save the entity into text file
                 // Create Instance of the Pokemon
                 retrievedPokemon = new Pokemon(id, name, types, encounterConditionList, stats, formattedDate);
                 copiedCachedData.add(retrievedPokemon);
+                // Save the entity into text file
                 objectMapper.writeValue(Paths.get("cache.txt").toFile(), copiedCachedData);
             }
 
             Pokemon result = cachedPokemon != null ? cachedPokemon : retrievedPokemon;
 
             // Print out the result
-            System.out.println("Here's the result!!");
-            System.out.println("========================================================================================");
-            System.out.println("Result:");
-            System.out.println("    <Pokemon ID>");
-            System.out.println("    -> " + result.getId());
-            System.out.println("");
-            System.out.println("    <Pokemon Name>");
-            System.out.println("    -> " + result.getName());
-            System.out.println("");
-            System.out.println("    <Pokemon Types>");
-            System.out.println("    -> " + result.getTypes());
-            System.out.println("");
-            System.out.println("    <Pokemon Encounter Locations and methods in Kanto> ");
-            if(result.getEncounterConditions().size() == 0) {
-                System.out.println("    -> " + "-");
-            } else {
-                for (EncounterCondition encounterCondition : result.getEncounterConditions()) {
-                    System.out.println("    -> " + encounterCondition.getLocationName() + "(method: " + encounterCondition.getMethodNames() + ")");
-                }
-            }
-            System.out.println("");
-            System.out.println("    <Pokemon stats>");
-            for (Stat stat: result.getStats()) {
-                System.out.println("    -> " + stat.getName() + ": " + stat.getBaseStat());
-            }
-            System.out.println("========================================================================================");
-            System.out.println("");
+            printResult(result);
 
         } // End while
-
-
 
         System.out.println("Bye!");
 
@@ -173,7 +145,33 @@ public class Main {
 
     }
 
-    public static void printResult(Pokemon pokemon) {
-        // TODO
+    public static void printResult(Pokemon result) {
+        System.out.println("Here's the result!!");
+        System.out.println("========================================================================================");
+        System.out.println("Result:");
+        System.out.println("    <Pokemon ID>");
+        System.out.println("    -> " + result.getId());
+        System.out.println("");
+        System.out.println("    <Pokemon Name>");
+        System.out.println("    -> " + result.getName());
+        System.out.println("");
+        System.out.println("    <Pokemon Types>");
+        System.out.println("    -> " + result.getTypes());
+        System.out.println("");
+        System.out.println("    <Pokemon Encounter Locations and methods in Kanto> ");
+        if(result.getEncounterConditions().size() == 0) {
+            System.out.println("    -> " + "-");
+        } else {
+            for (EncounterCondition encounterCondition : result.getEncounterConditions()) {
+                System.out.println("    -> " + encounterCondition.getLocationName() + "(method: " + encounterCondition.getMethodNames() + ")");
+            }
+        }
+        System.out.println("");
+        System.out.println("    <Pokemon stats>");
+        for (Stat stat: result.getStats()) {
+            System.out.println("    -> " + stat.getName() + ": " + stat.getBaseStat());
+        }
+        System.out.println("========================================================================================");
+        System.out.println("");
     }
 }
