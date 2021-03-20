@@ -42,9 +42,10 @@ public class Main {
             }
             Pokemon cachedPokemon = null;
 
-            // Retrieve Cache data
-            InputStream in = Main.class.getResourceAsStream("/cache.txt");
-            List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(in, Pokemon[].class));
+            // Read Cache from external text file
+            File textFile = new File("/Users/manabu/Downloads/TakeHome_ManabuTakeya_Submission_21032021/cache/cache.txt");
+            List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(new FileInputStream(textFile), Pokemon[].class));
+
             List<Pokemon> copiedCachedData = new ArrayList<>(cachedData);
 
             // If find the Pokemon & not older than a week old, use cache.
@@ -128,8 +129,8 @@ public class Main {
                 // Create Instance of the Pokemon
                 retrievedPokemon = new Pokemon(id, name, types, encounterConditionList, stats, formattedDate);
                 copiedCachedData.add(retrievedPokemon);
-                // Save the entity into text file
-                objectMapper.writeValue(Paths.get("cache.txt").toFile(), copiedCachedData);
+                // Update Cache in the text file.
+                objectMapper.writeValue(textFile, copiedCachedData);
             }
 
             Pokemon result = cachedPokemon != null ? cachedPokemon : retrievedPokemon;

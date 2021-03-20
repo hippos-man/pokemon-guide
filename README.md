@@ -21,7 +21,7 @@ if not, you can check from [here](https://www.oracle.com/sg/java/technologies/ja
 - Run the application.
 
 ```bash
-
+java -jar <PATH_TO_JAR_FILE>
 ```
 
 - xxxxxxxxx.
