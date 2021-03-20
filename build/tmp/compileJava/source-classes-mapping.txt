@@ -1,0 +1,30 @@
+Entity/Method.java
+ Entity.Method
+DTO/VersionDetails.java
+ DTO.VersionDetails
+DTO/Stats.java
+ DTO.Stats
+DTO/LocationArea.java
+ DTO.LocationArea
+DTO/Stat.java
+ DTO.Stat
+DTO/PokemonResponse.java
+ DTO.PokemonResponse
+DTO/Type.java
+ DTO.Type
+Entity/Pokemon.java
+ Entity.Pokemon
+DTO/Method.java
+ DTO.Method
+DTO/Types.java
+ DTO.Types
+DTO/EncounterDetails.java
+ DTO.EncounterDetails
+Entity/Stat.java
+ Entity.Stat
+DTO/Encounter.java
+ DTO.Encounter
+Entity/EncounterCondition.java
+ Entity.EncounterCondition
+Main.java
+ Main
