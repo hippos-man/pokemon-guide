@@ -7,6 +7,7 @@ import entity.EncounterCondition;
 import entity.Pokemon;
 import entity.Stat;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -62,7 +63,6 @@ public class PokemonService {
 
         // Fetch the Pokemon data from API
         URL pokemonUrl = new URL("https://pokeapi.co/api/v2/pokemon/" + input + "/");
-        System.out.println("Requested URL: " + pokemonUrl);
         HttpURLConnection basicConnection = (HttpURLConnection) pokemonUrl.openConnection();
         basicConnection.setRequestProperty("Accept", "application/json");
         basicConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
@@ -75,7 +75,6 @@ public class PokemonService {
 
     public Encounter[] fetchEncounters(String id) throws IOException{
         URL locationUrl = new URL("https://pokeapi.co/api/v2/pokemon/" + id + "/encounters");
-        System.out.println("Requested URL: " + locationUrl);
         HttpURLConnection locationConnection = (HttpURLConnection) locationUrl.openConnection();
         locationConnection.setRequestProperty("Accept", "application/json");
         locationConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");

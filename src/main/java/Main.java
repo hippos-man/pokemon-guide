@@ -2,7 +2,6 @@ import entity.EncounterCondition;
 import entity.Pokemon;
 import entity.Stat;
 import dto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import service.CacheService;
 import service.PokemonService;
 
@@ -29,6 +28,8 @@ public class Main {
                 input = readInput();
             } catch (IOException ex) {
                 System.out.println("Invalid input. Try again!");
+                System.out.println("========================================================================================");
+                System.out.println("");
                 continue;
             }
 
@@ -37,6 +38,14 @@ public class Main {
             if(input.equals("exit") || input.equals("quit")){
                 break;
             }
+
+            if (input.equals("")) {
+                System.out.println("Type something!");
+                System.out.println("========================================================================================");
+                System.out.println("");
+                continue;
+            }
+
             System.out.println("");
             System.out.println("Searching...");
             System.out.println("");
@@ -51,10 +60,9 @@ public class Main {
 
 
             // Find Pokemon from cache.
-            // If find the Pokemon & not older than a week old, use cache.
             Pokemon target = getCachedPokemon(input, copiedCachedData);
 
-            // Check if it's available
+            // Check if it's available (not older than a week)
             if (target != null) {
                 Boolean isOldCache = isOlderThanAWeek(target, now);
                 if (isOldCache) {
@@ -67,13 +75,24 @@ public class Main {
 
             Pokemon retrievedPokemon = null;
 
-            // If not found in cache.
+            // Call API if not found from cache.
             if (cachedPokemon == null) {
-                PokemonService pokemonService = new PokemonService();
-                PokemonResponse pokemonResponse = pokemonService.fetchPokemonInfo(input);
-                retrievedPokemon = pokemonService.retrievePokemon(pokemonResponse, formattedDate);
-                copiedCachedData.add(retrievedPokemon);
 
+                PokemonService pokemonService = new PokemonService();
+
+                try {
+
+                    PokemonResponse pokemonResponse = pokemonService.fetchPokemonInfo(input);
+                    retrievedPokemon = pokemonService.retrievePokemon(pokemonResponse, formattedDate);
+
+                } catch (IOException ex) {
+                    System.out.println("Not found it! Try again!");
+                    System.out.println("========================================================================================");
+                    System.out.println("");
+                    continue;
+                }
+
+                copiedCachedData.add(retrievedPokemon);
                 // Update Cache in the text file.
                 cacheService.saveCache(textFile, copiedCachedData);
             }
