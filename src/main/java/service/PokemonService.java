@@ -18,7 +18,7 @@ public class PokemonService {
 
     public final ObjectMapper objectMapper = new ObjectMapper();
 
-    // TODO
+    // TODO Handle File not found.
     public Pokemon retrievePokemon (PokemonResponse pokemonResponse, String formattedDate) throws IOException{
 
         String id = pokemonResponse.getId();

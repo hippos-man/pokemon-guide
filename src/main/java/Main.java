@@ -3,17 +3,14 @@ import entity.Pokemon;
 import entity.Stat;
 import dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import service.CacheService;
 import service.PokemonService;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-
-    public static ObjectMapper objectMapper = new ObjectMapper();
 
     public static void main(String[] args) throws IOException {
 
@@ -36,28 +33,26 @@ public class Main {
             }
 
             System.out.println("You typed \"" + input + "\"");
-            System.out.println("");
-            System.out.println("Searching...");
-            System.out.println("");
 
             if(input.equals("exit") || input.equals("quit")){
                 break;
             }
+            System.out.println("");
+            System.out.println("Searching...");
+            System.out.println("");
+
             Pokemon cachedPokemon = null;
 
             // Read Cache from external text file
-            // For executable jar
-//            String jarLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/pokemon-finder-1.0-SNAPSHOT.jar")[0].split("file:")[1] + "/cache/cache.txt";
-            // For local dev
-            String cacheFileLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/build")[0].split("file:")[1] + "/cache/cache.txt";
-
+            String cacheFileLocation = getCacheFileLocation("local");
             File textFile = new File(cacheFileLocation);
-            List<Pokemon> copiedCachedData = retrieveCache(textFile);
+            CacheService cacheService = new CacheService();
+            List<Pokemon> copiedCachedData = cacheService.retrieveCache(textFile);
 
 
             // Find Pokemon from cache.
             // If find the Pokemon & not older than a week old, use cache.
-            Pokemon target = getCachedPokemon(input, copiedCachedData, now);
+            Pokemon target = getCachedPokemon(input, copiedCachedData);
 
             // Check if it's available
             if (target != null) {
@@ -79,9 +74,8 @@ public class Main {
                 retrievedPokemon = pokemonService.retrievePokemon(pokemonResponse, formattedDate);
                 copiedCachedData.add(retrievedPokemon);
 
-                // TODO export method
                 // Update Cache in the text file.
-                objectMapper.writeValue(textFile, copiedCachedData);
+                cacheService.saveCache(textFile, copiedCachedData);
             }
 
             Pokemon result = cachedPokemon != null ? cachedPokemon : retrievedPokemon;
@@ -107,15 +101,21 @@ public class Main {
         return reader.readLine().toLowerCase();
     }
 
-    public static List<Pokemon> retrieveCache(File textFile) throws RuntimeException, IOException {
-        if(textFile == null) {
-            throw new RuntimeException();
+    public static String getCacheFileLocation(String env) {
+        String cachePath = "";
+
+        if(env.equals("local")) {
+            cachePath = Main.class.getProtectionDomain().getCodeSource().getLocation().toString()
+                    .split("/build")[0].split("file:")[1] + "/cache/cache.txt";
+        } else if(env.equals("prod")){
+            cachePath = Main.class.getProtectionDomain().getCodeSource().getLocation().toString()
+                    .split("/pokemon-finder-1.0-SNAPSHOT.jar")[0].split("file:")[1] + "/cache/cache.txt";
         }
-        List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(new FileInputStream(textFile), Pokemon[].class));
-        return new ArrayList<>(cachedData);
+
+        return cachePath;
     }
 
-    public static Pokemon getCachedPokemon(String input, List<Pokemon> copiedCacheList, LocalDate now) {
+    public static Pokemon getCachedPokemon(String input, List<Pokemon> copiedCacheList) {
         Pokemon target = null;
         for (Pokemon pokemon : copiedCacheList) {
             // find the Pokemon by name & id
@@ -133,6 +133,7 @@ public class Main {
     }
 
     public static void printResult(Pokemon result) {
+        System.out.println("========================================================================================");
         System.out.println("We found it!!");
         System.out.println("========================================================================================");
         System.out.println("Result:");
