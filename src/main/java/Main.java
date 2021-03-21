@@ -18,6 +18,8 @@ public class Main {
         LocalDate now = LocalDate.now();
         String formattedDate = now.toString();
         String input = "";
+        CacheService cacheService = new CacheService();
+        PokemonService pokemonService = new PokemonService();
 
         while (isEnabled) {
 
@@ -40,9 +42,7 @@ public class Main {
             }
 
             if (input.equals("")) {
-                System.out.println("Type something!");
-                System.out.println("========================================================================================");
-                System.out.println("");
+                printError("Type something!");
                 continue;
             }
 
@@ -53,14 +53,13 @@ public class Main {
             Pokemon cachedPokemon = null;
 
             // Read Cache from external text file
-            String cacheFileLocation = getCacheFileLocation("local");
+            String cacheFileLocation = getFilePath("prod");
             File textFile = new File(cacheFileLocation);
-            CacheService cacheService = new CacheService();
             List<Pokemon> copiedCachedData = cacheService.retrieveCache(textFile);
 
 
             // Find Pokemon from cache.
-            Pokemon target = getCachedPokemon(input, copiedCachedData);
+            Pokemon target = cacheService.getCachedPokemon(input, copiedCachedData);
 
             // Check if it's available (not older than a week)
             if (target != null) {
@@ -78,17 +77,13 @@ public class Main {
             // Call API if not found from cache.
             if (cachedPokemon == null) {
 
-                PokemonService pokemonService = new PokemonService();
-
                 try {
 
                     PokemonResponse pokemonResponse = pokemonService.fetchPokemonInfo(input);
                     retrievedPokemon = pokemonService.retrievePokemon(pokemonResponse, formattedDate);
 
                 } catch (IOException ex) {
-                    System.out.println("Not found it! Try again!");
-                    System.out.println("========================================================================================");
-                    System.out.println("");
+                    printError("Not found! Try again!");
                     continue;
                 }
 
@@ -120,7 +115,7 @@ public class Main {
         return reader.readLine().toLowerCase();
     }
 
-    public static String getCacheFileLocation(String env) {
+    public static String getFilePath(String env) {
         String cachePath = "";
 
         if(env.equals("local")) {
@@ -130,25 +125,19 @@ public class Main {
             cachePath = Main.class.getProtectionDomain().getCodeSource().getLocation().toString()
                     .split("/pokemon-finder-1.0-SNAPSHOT.jar")[0].split("file:")[1] + "/cache/cache.txt";
         }
-
         return cachePath;
-    }
-
-    public static Pokemon getCachedPokemon(String input, List<Pokemon> copiedCacheList) {
-        Pokemon target = null;
-        for (Pokemon pokemon : copiedCacheList) {
-            // find the Pokemon by name & id
-            if(pokemon.getName().equals(input) || pokemon.getId().equals(input)) {
-                target = pokemon;
-            }
-        }
-        return target;
     }
 
     public static Boolean isOlderThanAWeek(Pokemon cache, LocalDate now) {
         LocalDate cachedDate = LocalDate.parse(cache.getCachedDate());
         LocalDate oneWeekAgo = now.minusDays(7);
         return cachedDate.isBefore(oneWeekAgo);
+    }
+
+    public static void printError(String message) {
+        System.out.println(message);
+        System.out.println("========================================================================================");
+        System.out.println("");
     }
 
     public static void printResult(Pokemon result) {

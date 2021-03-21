@@ -7,7 +7,6 @@ import entity.EncounterCondition;
 import entity.Pokemon;
 import entity.Stat;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -19,7 +18,6 @@ public class PokemonService {
 
     public final ObjectMapper objectMapper = new ObjectMapper();
 
-    // TODO Handle File not found.
     public Pokemon retrievePokemon (PokemonResponse pokemonResponse, String formattedDate) throws IOException{
 
         String id = pokemonResponse.getId();

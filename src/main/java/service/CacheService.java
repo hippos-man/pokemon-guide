@@ -26,4 +26,15 @@ public class CacheService {
         objectMapper.writeValue(textFile, data);
     }
 
+    public Pokemon getCachedPokemon(String input, List<Pokemon> copiedCacheList) {
+        Pokemon target = null;
+        for (Pokemon pokemon : copiedCacheList) {
+            // find the Pokemon by name & id
+            if(pokemon.getName().equals(input) || pokemon.getId().equals(input)) {
+                target = pokemon;
+            }
+        }
+        return target;
+    }
+
 }
