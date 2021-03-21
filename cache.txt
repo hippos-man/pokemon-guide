@@ -1,1 +1,0 @@
-[{"id":"1","name":"bulbasaur","types":["grass","poison"],"encounterConditions":[],"stats":[{"name":"hp","baseStat":45},{"name":"attack","baseStat":49},{"name":"defense","baseStat":49},{"name":"special-attack","baseStat":65},{"name":"special-defense","baseStat":65},{"name":"speed","baseStat":45}],"cachedDate":"2021-03-20"}]

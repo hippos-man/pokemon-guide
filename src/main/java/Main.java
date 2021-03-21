@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +42,10 @@ public class Main {
             Pokemon cachedPokemon = null;
 
             // Read Cache from external text file
-            File textFile = new File("/Users/manabu/Downloads/TakeHome_ManabuTakeya_Submission_21032021/cache/cache.txt");
+//            String jarLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/pokemon-finder-1.0-SNAPSHOT.jar")[0].split("file:")[1] + "/cache/cache.txt";
+            // For local dev
+            String jarLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/build")[0].split("file:")[1] + "/cache/cache.txt";
+            File textFile = new File(jarLocation);
             List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(new FileInputStream(textFile), Pokemon[].class));
 
             List<Pokemon> copiedCachedData = new ArrayList<>(cachedData);
