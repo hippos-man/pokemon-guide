@@ -2,12 +2,10 @@ import entity.EncounterCondition;
 import entity.Pokemon;
 import entity.Stat;
 import dto.*;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import service.PokemonService;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,21 +17,27 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        System.out.println("--------------------------------------------");
-        System.out.println("Welcome to Pokemon Finder!!");
-        System.out.println("");
-
+        init();
         Boolean isEnabled = true;
         LocalDate now = LocalDate.now();
         String formattedDate = now.toString();
+        String input = "";
 
         while (isEnabled) {
 
             System.out.println("Please type Pokemon Name or ID to search!");
             System.out.print(">>> ");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String input = reader.readLine().toLowerCase();
-            System.out.println("You typed: " + input);
+
+            try {
+                input = readInput();
+            } catch (IOException ex) {
+                System.out.println("Invalid input. Try again!");
+                continue;
+            }
+
+            System.out.println("You typed \"" + input + "\"");
+            System.out.println("");
+            System.out.println("Searching...");
             System.out.println("");
 
             if(input.equals("exit") || input.equals("quit")){
@@ -42,95 +46,40 @@ public class Main {
             Pokemon cachedPokemon = null;
 
             // Read Cache from external text file
+            // For executable jar
 //            String jarLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/pokemon-finder-1.0-SNAPSHOT.jar")[0].split("file:")[1] + "/cache/cache.txt";
             // For local dev
-            String jarLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/build")[0].split("file:")[1] + "/cache/cache.txt";
-            File textFile = new File(jarLocation);
-            List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(new FileInputStream(textFile), Pokemon[].class));
+            String cacheFileLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().split("/build")[0].split("file:")[1] + "/cache/cache.txt";
 
-            List<Pokemon> copiedCachedData = new ArrayList<>(cachedData);
+            File textFile = new File(cacheFileLocation);
+            List<Pokemon> copiedCachedData = retrieveCache(textFile);
 
+
+            // Find Pokemon from cache.
             // If find the Pokemon & not older than a week old, use cache.
-            for (Pokemon pokemon : copiedCachedData) {
-                // find the Pokemon by name & id
-                if(pokemon.getName().equals(input) || pokemon.getId().equals(input)) {
-                    // check if the cached date is older than a week old.
-                    LocalDate cachedDate = LocalDate.parse(pokemon.getCachedDate());
-                    LocalDate oneWeekAgo = now.minusDays(7);
-                    if (cachedDate.isBefore(oneWeekAgo)) {
-                        // Delete old cache
-                        copiedCachedData.remove(pokemon);
-                        break;
-                    } else {
-                        cachedPokemon = pokemon;
-                        break;
-                    }
+            Pokemon target = getCachedPokemon(input, copiedCachedData, now);
+
+            // Check if it's available
+            if (target != null) {
+                Boolean isOldCache = isOlderThanAWeek(target, now);
+                if (isOldCache) {
+                    // Delete exiting cache if it's old.
+                    copiedCachedData.remove(target);
+                } else {
+                    cachedPokemon = target;
                 }
             }
 
-
             Pokemon retrievedPokemon = null;
-            // If not found in cache
+
+            // If not found in cache.
             if (cachedPokemon == null) {
-
-                // Fetch the Pokemon data from API
-                URL pokemonUrl = new URL("https://pokeapi.co/api/v2/pokemon/" + input + "/");
-                System.out.println("Requested URL: " + pokemonUrl);
-                HttpURLConnection basicConnection = (HttpURLConnection) pokemonUrl.openConnection();
-                basicConnection.setRequestProperty("Accept", "application/json");
-                basicConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
-                InputStream pokemonMainStream = basicConnection.getInputStream();
-
-                // Convert Pokemon Response Json to Java object
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                PokemonResponse pokemonResponse = objectMapper.readValue(pokemonMainStream, PokemonResponse.class);
-
-                // Convert Pokemon Json to Pokemon Object (name, id, types, stats)
-                String id = pokemonResponse.getId();
-                String name = pokemonResponse.getName();
-                List<String> types = new ArrayList<>();
-                for (Types type : pokemonResponse.getTypes()) {
-                    types.add(type.getType().getName());
-                }
-
-                List<Stat> stats = new ArrayList<>();
-                for (Stats statsResponse : pokemonResponse.getStats()) {
-                    stats.add(new Stat(statsResponse.getStat().getName(), Integer.parseInt(statsResponse.getBase_stat())));
-                }
-
-                // Fetch the Location and Methods data from API
-                URL locationUrl = new URL("https://pokeapi.co/api/v2/pokemon/" + id + "/encounters");
-                System.out.println("Requested URL: " + locationUrl);
-                HttpURLConnection locationConnection = (HttpURLConnection) locationUrl.openConnection();
-                locationConnection.setRequestProperty("Accept", "application/json");
-                locationConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
-                InputStream locationStream = locationConnection.getInputStream();
-
-                // Convert Location response Json to Java object (location, method)
-                Encounter[] encounters = objectMapper.readValue(locationStream, Encounter[].class);
-                // Encounter condition
-                List<EncounterCondition> encounterConditionList = new ArrayList<>();
-                for (Encounter encounter: encounters) {
-                    String locationName = encounter.getLocation_area().getName();
-                    // Add only location in Kanto.
-                    if(!locationName.startsWith("kanto-")) {
-                        continue;
-                    }
-                    List<String> methods = new ArrayList<>();
-                    for (VersionDetails versionDetails : encounter.getVersion_details()) {
-                        for (EncounterDetails encounterDetails : versionDetails.getEncounter_details()) {
-                            // if already the list has same method, don't add it.
-                            String method = encounterDetails.getMethod().getName();
-                            if(!methods.contains(method)) {
-                                methods.add(encounterDetails.getMethod().getName());
-                            }
-                        }
-                    }
-                    encounterConditionList.add(new EncounterCondition(locationName, methods));
-                }
-                // Create Instance of the Pokemon
-                retrievedPokemon = new Pokemon(id, name, types, encounterConditionList, stats, formattedDate);
+                PokemonService pokemonService = new PokemonService();
+                PokemonResponse pokemonResponse = pokemonService.fetchPokemonInfo(input);
+                retrievedPokemon = pokemonService.retrievePokemon(pokemonResponse, formattedDate);
                 copiedCachedData.add(retrievedPokemon);
+
+                // TODO export method
                 // Update Cache in the text file.
                 objectMapper.writeValue(textFile, copiedCachedData);
             }
@@ -144,12 +93,47 @@ public class Main {
 
         System.out.println("Bye!");
 
+    }
 
 
+    public static void init() {
+        System.out.println("--------------------------------------------");
+        System.out.println("Welcome to Pokemon App!!");
+        System.out.println("");
+    }
+
+    public static String readInput() throws IOException{
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        return reader.readLine().toLowerCase();
+    }
+
+    public static List<Pokemon> retrieveCache(File textFile) throws RuntimeException, IOException {
+        if(textFile == null) {
+            throw new RuntimeException();
+        }
+        List<Pokemon> cachedData = Arrays.asList(objectMapper.readValue(new FileInputStream(textFile), Pokemon[].class));
+        return new ArrayList<>(cachedData);
+    }
+
+    public static Pokemon getCachedPokemon(String input, List<Pokemon> copiedCacheList, LocalDate now) {
+        Pokemon target = null;
+        for (Pokemon pokemon : copiedCacheList) {
+            // find the Pokemon by name & id
+            if(pokemon.getName().equals(input) || pokemon.getId().equals(input)) {
+                target = pokemon;
+            }
+        }
+        return target;
+    }
+
+    public static Boolean isOlderThanAWeek(Pokemon cache, LocalDate now) {
+        LocalDate cachedDate = LocalDate.parse(cache.getCachedDate());
+        LocalDate oneWeekAgo = now.minusDays(7);
+        return cachedDate.isBefore(oneWeekAgo);
     }
 
     public static void printResult(Pokemon result) {
-        System.out.println("Here's the result!!");
+        System.out.println("We found it!!");
         System.out.println("========================================================================================");
         System.out.println("Result:");
         System.out.println("    <Pokemon ID>");
