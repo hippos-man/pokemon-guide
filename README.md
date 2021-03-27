@@ -23,7 +23,3 @@ if not, you can check from [here](https://www.oracle.com/sg/java/technologies/ja
 ```bash
 java -jar <PATH_TO_JAR_FILE>
 ```
-
-- xxxxxxxxx.
-
-- xxxxxxxxx.
